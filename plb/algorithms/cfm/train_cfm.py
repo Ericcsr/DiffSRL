@@ -1,8 +1,8 @@
 import numpy as np
 import torch
-from ...neurals.autoencoder import PCNEncoder, PCNDecoder
+from ...neurals.autoencoder import PCNEncoder
 from ...neurals.latent_forward import ForwardModel
-from ...neurals.pcdataloader import ChopSticksDataset
+from ...neurals.pcdataloader import ChopsticksCFMDataset
 from .cpc_loss import InfoNCELoss
 import argparse
 from torch.utils.data import DataLoader
@@ -11,9 +11,10 @@ device = torch.device('cuda:0')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--batch_size',type=int,default=32)
+parser.add_argument('--num_iters',type=int, default=10)
 args = parser.parse_args()
 
-dataset = ChopSticksDataset()
+dataset = ChopsticksCFMDataset()
 dataloader = DataLoader(dataset,batch_size = args.batch_size)
 
 n_particles = dataset.n_particles
@@ -22,22 +23,28 @@ latent_dim = 1024
 
 encoder = PCNEncoder(
     state_dim=3,
-    latent_dim=latent_dim)
+    latent_dim=latent_dim).to(device)
 
 forward_model = ForwardModel(
     latent_dim=latent_dim,
-    action_dim = n_actions)
+    action_dim = n_actions).to(device)
 
 loss_fn = InfoNCELoss()
 
-optimizer = torch.optim.Adam([encoder.parameters(),forward_model.parameters()],lr=0.0001)
+params = list(encoder.parameters()) + list(forward_model.parameters())
+optimizer = torch.optim.Adam(params,lr=0.0001)
 
 def train(encoder,forward_model,optimizer,dataloader,loss_fn):
     total_loss = 0
     batch_cnt = 0
     for state, target, action in dataloader:
+        state = state.to(device)
+        target = target.to(device)
+        action = action.to(device)
         optimizer.zero_grad()
         latent = encoder(state)
+        print(latent.shape)
+        print(action.shape)
         latent_pred = forward_model(latent, action)
         latent_next = encoder(target)
         loss = loss_fn(latent, latent_pred, latent_next)
