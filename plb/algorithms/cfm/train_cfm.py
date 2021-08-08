@@ -51,6 +51,7 @@ def train(encoder,forward_model,optimizer,dataloader,loss_fn):
         total_loss += float(loss)
         loss.backward()
         optimizer.step()
+        batch_cnt += 1
     return total_loss/batch_cnt
 
 
