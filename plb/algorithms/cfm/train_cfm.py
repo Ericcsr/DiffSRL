@@ -6,6 +6,7 @@ from ...neurals.pcdataloader import ChopsticksCFMDataset
 from .cpc_loss import InfoNCELoss
 import argparse
 from torch.utils.data import DataLoader
+import os
 
 device = torch.device('cuda:0')
 
@@ -58,5 +59,6 @@ def train(encoder,forward_model,optimizer,dataloader,loss_fn):
 for iter in range(args.num_iters):
     loss = train(encoder,forward_model,optimizer,dataloader, loss_fn)
     print("Iteration:",iter,"Loss:",loss)
-
+if not os.path.exists('pretrain_model'):
+    os.makedirs('pretrain_model')
 torch.save(encoder.state_dict(),'pretrain_model/weight_cfm.pth')
