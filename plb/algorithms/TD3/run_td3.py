@@ -63,7 +63,6 @@ def train_td3(env, path, logger, old_args):
     parser.add_argument("--policy_freq", default=2, type=int)       # Frequency of delayed policy updates
     parser.add_argument("--save_model", action="store_true")        # Save model and optimizer parameters
     parser.add_argument("--load_model", default="")                 # Model load file name, "" doesn't load, "default" uses file_name
-    parser.add_argument('--result_name',type=str,default=None,required=True)
 
     max_timesteps = old_args.num_steps
 
@@ -174,4 +173,4 @@ def train_td3(env, path, logger, old_args):
                     print(output)
                     #np.save(f"./results/{file_name}", evaluations)
                     policy.save(log_path)
-    np.save('../../../rewards/rewards_{}.npz'.format(args.result_name),reward_buffer)
+    np.save('../../../rewards/rewards_{}.npz'.format(old_args.result_name),reward_buffer)
