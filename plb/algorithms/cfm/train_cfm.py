@@ -1,12 +1,13 @@
-import numpy as np
+import argparse
+import os
+
 import torch
+from torch.utils.data.dataloader import DataLoader
+
 from ...neurals.autoencoder import PCNEncoder
 from ...neurals.latent_forward import ForwardModel
 from ...neurals.pcdataloader import ChopsticksCFMDataset
 from .cpc_loss import InfoNCELoss
-import argparse
-from torch.utils.data import DataLoader
-import os
 
 device = torch.device('cuda:0')
 
@@ -28,14 +29,20 @@ encoder = PCNEncoder(
 
 forward_model = ForwardModel(
     latent_dim=latent_dim,
-    action_dim = n_actions).to(device)
+    # complexityLevel=ForwardModel.ComplexityLevel.Linear,
+    action_dim=n_actions).to(device)
 
 loss_fn = InfoNCELoss()
 
 params = list(encoder.parameters()) + list(forward_model.parameters())
 optimizer = torch.optim.Adam(params,lr=0.0001)
 
-def train(encoder,forward_model,optimizer,dataloader,loss_fn):
+def train(encoder:PCNEncoder,
+        forward_model:torch.nn.Module,
+        optimizer: torch.nn.Module,
+        dataloader:DataLoader,
+        loss_fn: torch.nn.Module):
+
     total_loss = 0
     batch_cnt = 0
     for state, target, action in dataloader:
