@@ -8,6 +8,7 @@ data
 *.pkl
 *__pycache__*
 *tmp*
+**/rewards/*np[zy]
 *.idea
 *.DS_Store*
 *egg-info*
