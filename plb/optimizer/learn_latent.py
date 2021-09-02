@@ -224,15 +224,15 @@ def learn_latent(
     for i in range(epochs):
         total_loss = 0
         batch_cnt = 0
-        for stateMiniBatch, targetMiniBatch, actionMiniBatch, indexMiniBatch in dataloader:
+        for stateMiniBatch, targetMiniBatch, actionMiniBatch, _ in dataloader:
             stateProc = list(mpi.batch_collate(
                 stateMiniBatch[0], stateMiniBatch[1], stateMiniBatch[2], stateMiniBatch[3], stateMiniBatch[4],
                 toNumpy=True
             )) if MPI_ENABLE else stateMiniBatch
-            targetProc, actionProc, indexProc = mpi.batch_collate(
-                targetMiniBatch[0], actionMiniBatch, indexMiniBatch, 
+            targetProc, actionProc = mpi.batch_collate(
+                targetMiniBatch[0], actionMiniBatch,
                 toNumpy=True
-            ) if MPI_ENABLE else (targetMiniBatch, actionMiniBatch, indexMiniBatch)
+            ) if MPI_ENABLE else (targetMiniBatch, actionMiniBatch)
             result_state, gradient, lossInBuffer, currentLoss = solver.solve_multistep(
                 state=stateProc,
                 actions=actionProc,
